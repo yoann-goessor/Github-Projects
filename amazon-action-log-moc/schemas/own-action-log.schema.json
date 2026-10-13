@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "own-action-log",
+  "title": "Own Amazon listing action log",
+  "type": "object",
+  "required": ["marketplace", "generated_at", "actions"],
+  "properties": {
+    "marketplace": {
+      "type": "string",
+      "description": "Amazon marketplace id, e.g. ATVPDKIKX0DER (US)"
+    },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "window": {
+      "type": "object",
+      "properties": {
+        "start": { "type": "string", "format": "date-time" },
+        "end": { "type": "string", "format": "date-time" }
+      }
+    },
+    "actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["timestamp", "asin", "action_type"],
+        "properties": {
+          "id": { "type": "string" },
+          "timestamp": { "type": "string", "format": "date-time" },
+          "asin": { "type": "string" },
+          "sku": { "type": "string" },
+          "actor": { "type": "string", "description": "User, API app, or automation name" },
+          "action_type": {
+            "type": "string",
+            "enum": [
+              "price",
+              "coupon",
+              "promo",
+              "inventory",
+              "offer",
+              "content_title",
+              "content_bullets",
+              "content_description",
+              "content_images",
+              "content_a_plus",
+              "content_keywords",
+              "variation",
+              "suppression",
+              "compliance",
+              "other"
+            ]
+          },
+          "field": { "type": "string" },
+          "before": {},
+          "after": {},
+          "source": {
+            "type": "string",
+            "description": "e.g. seller_central_action_log, flat_file, api"
+          },
+          "notes": { "type": "string" }
+        }
+      }
+    },
+    "metrics": {
+      "type": "array",
+      "description": "Optional performance context aligned to the window",
+      "items": {
+        "type": "object",
+        "required": ["asin"],
+        "properties": {
+          "asin": { "type": "string" },
+          "buy_box_pct": { "type": "number" },
+          "sessions": { "type": "number" },
+          "unit_session_pct": { "type": "number" },
+          "ordered_units": { "type": "number" },
+          "notes": { "type": "string" }
+        }
+      }
+    }
+  }
+}

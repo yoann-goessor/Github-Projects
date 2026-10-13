@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "comparison-report",
+  "title": "Own vs competitor action comparison report",
+  "type": "object",
+  "required": ["window", "snapshot", "threats", "actions"],
+  "properties": {
+    "window": {
+      "type": "object",
+      "required": ["start", "end", "marketplace"],
+      "properties": {
+        "start": { "type": "string", "format": "date-time" },
+        "end": { "type": "string", "format": "date-time" },
+        "marketplace": { "type": "string" }
+      }
+    },
+    "snapshot": { "type": "string" },
+    "own_timeline": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "asin": { "type": "string" },
+          "events": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "timestamp": { "type": "string" },
+                "action_type": { "type": "string" },
+                "summary": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "competitor_moves": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "asin": { "type": "string" },
+          "summary": { "type": "string" },
+          "chronology_vs_own": {
+            "type": "string",
+            "enum": ["led", "matched", "lagged", "ignored", "unknown"]
+          }
+        }
+      }
+    },
+    "gaps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "dimension": { "type": "string" },
+          "detail": { "type": "string" },
+          "impact": { "type": "string", "enum": ["high", "medium", "low"] }
+        }
+      }
+    },
+    "threats": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["severity", "asin", "detail"],
+        "properties": {
+          "severity": { "type": "string", "enum": ["P0", "P1", "P2", "P3"] },
+          "asin": { "type": "string" },
+          "detail": { "type": "string" },
+          "evidence": { "type": "string" }
+        }
+      }
+    },
+    "actions": {
+      "type": "array",
+      "maxItems": 5,
+      "items": {
+        "type": "object",
+        "required": ["priority", "asin", "action", "owner_role", "deadline", "success_metric"],
+        "properties": {
+          "priority": { "type": "string", "enum": ["P0", "P1", "P2", "P3"] },
+          "asin": { "type": "string" },
+          "action": { "type": "string" },
+          "owner_role": { "type": "string" },
+          "deadline": { "type": "string" },
+          "success_metric": { "type": "string" }
+        }
+      }
+    },
+    "data_gaps": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "competitor-signals",
+  "title": "Competitor Amazon listing signals",
+  "type": "object",
+  "required": ["marketplace", "generated_at", "watchlist", "signals"],
+  "properties": {
+    "marketplace": { "type": "string" },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "window": {
+      "type": "object",
+      "properties": {
+        "start": { "type": "string", "format": "date-time" },
+        "end": { "type": "string", "format": "date-time" }
+      }
+    },
+    "watchlist": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["asin", "maps_to_own_asin"],
+        "properties": {
+          "asin": { "type": "string" },
+          "brand": { "type": "string" },
+          "maps_to_own_asin": {
+            "type": "string",
+            "description": "Your ASIN this competitor is tracked against"
+          },
+          "why_peer": { "type": "string" },
+          "price_band": { "type": "string" }
+        }
+      }
+    },
+    "signals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["timestamp", "asin", "signal_type"],
+        "properties": {
+          "id": { "type": "string" },
+          "timestamp": { "type": "string", "format": "date-time" },
+          "asin": { "type": "string" },
+          "signal_type": {
+            "type": "string",
+            "enum": [
+              "price_change",
+              "coupon_change",
+              "buy_box_change",
+              "stock_change",
+              "title_change",
+              "image_change",
+              "a_plus_change",
+              "bullet_change",
+              "review_velocity",
+              "rating_change",
+              "bsr_change",
+              "new_asin",
+              "bundle_change",
+              "ad_pressure",
+              "other"
+            ]
+          },
+          "before": {},
+          "after": {},
+          "source": {
+            "type": "string",
+            "description": "e.g. keepa, helium10, manual, sellersprite"
+          },
+          "confidence": {
+            "type": "string",
+            "enum": ["high", "medium", "low"]
+          },
+          "notes": { "type": "string" }
+        }
+      }
+    }
+  }
+}

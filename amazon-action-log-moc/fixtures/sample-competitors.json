@@ -1,0 +1,107 @@
+{
+  "marketplace": "ATVPDKIKX0DER",
+  "generated_at": "2026-04-10T12:00:00Z",
+  "window": {
+    "start": "2026-03-27T00:00:00Z",
+    "end": "2026-04-10T00:00:00Z"
+  },
+  "watchlist": [
+    {
+      "asin": "B0COMPAAA01",
+      "brand": "FlexiForm",
+      "maps_to_own_asin": "B0OWNHERO01",
+      "why_peer": "Same primary keyword; always page 1",
+      "price_band": "25-35"
+    },
+    {
+      "asin": "B0COMPBBB02",
+      "brand": "GroundGrip",
+      "maps_to_own_asin": "B0OWNHERO01",
+      "why_peer": "Feature parity; heavy couponing",
+      "price_band": "22-30"
+    },
+    {
+      "asin": "B0COMPCCC03",
+      "brand": "StillStudio",
+      "maps_to_own_asin": "B0OWNHERO01",
+      "why_peer": "Premium alternate; steals conversion with A+",
+      "price_band": "32-40"
+    }
+  ],
+  "signals": [
+    {
+      "id": "c-1",
+      "timestamp": "2026-03-29T10:00:00Z",
+      "asin": "B0COMPAAA01",
+      "signal_type": "image_change",
+      "before": "6 images",
+      "after": "main image refreshed + 2 lifestyle",
+      "source": "manual",
+      "confidence": "medium",
+      "notes": "1 day after our main image change"
+    },
+    {
+      "id": "c-2",
+      "timestamp": "2026-04-02T09:00:00Z",
+      "asin": "B0COMPBBB02",
+      "signal_type": "price_change",
+      "before": 28.99,
+      "after": 23.99,
+      "source": "keepa",
+      "confidence": "high",
+      "notes": "Undercut after our 04-01 promo"
+    },
+    {
+      "id": "c-3",
+      "timestamp": "2026-04-02T09:15:00Z",
+      "asin": "B0COMPBBB02",
+      "signal_type": "coupon_change",
+      "before": "5%",
+      "after": "15%",
+      "source": "keepa",
+      "confidence": "high"
+    },
+    {
+      "id": "c-4",
+      "timestamp": "2026-04-03T18:00:00Z",
+      "asin": "B0COMPAAA01",
+      "signal_type": "buy_box_change",
+      "before": "own brand",
+      "after": "second offeror briefly won BB on hero keyword traffic",
+      "source": "helium10",
+      "confidence": "medium",
+      "notes": "Correlates with our BB% drop"
+    },
+    {
+      "id": "c-5",
+      "timestamp": "2026-04-06T12:00:00Z",
+      "asin": "B0COMPCCC03",
+      "signal_type": "a_plus_change",
+      "before": "standard A+",
+      "after": "premium A+ with comparison chart vs 6mm mats",
+      "source": "manual",
+      "confidence": "high"
+    },
+    {
+      "id": "c-6",
+      "timestamp": "2026-04-08T08:00:00Z",
+      "asin": "B0COMPBBB02",
+      "signal_type": "review_velocity",
+      "before": "~2 reviews/day",
+      "after": "~6 reviews/day",
+      "source": "keepa",
+      "confidence": "medium",
+      "notes": "Possible Vine or insert push"
+    },
+    {
+      "id": "c-7",
+      "timestamp": "2026-04-09T07:00:00Z",
+      "asin": "B0COMPAAA01",
+      "signal_type": "stock_change",
+      "before": "in stock",
+      "after": "low stock badge",
+      "source": "manual",
+      "confidence": "low"
+    }
+  ]
+}
