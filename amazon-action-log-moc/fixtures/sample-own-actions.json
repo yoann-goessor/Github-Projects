@@ -1,0 +1,102 @@
+{
+  "marketplace": "ATVPDKIKX0DER",
+  "generated_at": "2026-04-10T12:00:00Z",
+  "window": {
+    "start": "2026-03-27T00:00:00Z",
+    "end": "2026-04-10T00:00:00Z"
+  },
+  "actions": [
+    {
+      "id": "own-1",
+      "timestamp": "2026-03-28T15:10:00Z",
+      "asin": "B0OWNHERO01",
+      "sku": "MAT-PRO-BLK",
+      "actor": "ops@example.com",
+      "action_type": "content_images",
+      "field": "main_image",
+      "before": "studio_v2.jpg",
+      "after": "studio_v3_lifestyle.jpg",
+      "source": "seller_central_action_log",
+      "notes": "A/B main image test"
+    },
+    {
+      "id": "own-2",
+      "timestamp": "2026-03-28T15:40:00Z",
+      "asin": "B0OWNHERO01",
+      "sku": "MAT-PRO-BLK",
+      "actor": "ops@example.com",
+      "action_type": "content_bullets",
+      "field": "bullet_2",
+      "before": "Non-slip base",
+      "after": "Non-slip base tested on hardwood and tile",
+      "source": "seller_central_action_log"
+    },
+    {
+      "id": "own-3",
+      "timestamp": "2026-04-01T14:22:00Z",
+      "asin": "B0OWNHERO01",
+      "sku": "MAT-PRO-BLK",
+      "actor": "pricing-bot",
+      "action_type": "price",
+      "field": "list_price",
+      "before": 29.99,
+      "after": 27.99,
+      "source": "api",
+      "notes": "Spring promo start"
+    },
+    {
+      "id": "own-4",
+      "timestamp": "2026-04-01T14:25:00Z",
+      "asin": "B0OWNHERO01",
+      "sku": "MAT-PRO-BLK",
+      "actor": "pricing-bot",
+      "action_type": "coupon",
+      "field": "coupon_pct",
+      "before": 0,
+      "after": 10,
+      "source": "api"
+    },
+    {
+      "id": "own-5",
+      "timestamp": "2026-04-05T11:05:00Z",
+      "asin": "B0OWNHERO01",
+      "sku": "MAT-PRO-BLK",
+      "actor": "ops@example.com",
+      "action_type": "inventory",
+      "field": "fulfillable_qty",
+      "before": 420,
+      "after": 95,
+      "source": "inventory_report",
+      "notes": "Inbound delayed; risk of OOS"
+    },
+    {
+      "id": "own-6",
+      "timestamp": "2026-04-07T09:30:00Z",
+      "asin": "B0OWNHERO02",
+      "sku": "MAT-PRO-BLU",
+      "actor": "content@example.com",
+      "action_type": "content_title",
+      "field": "item_name",
+      "before": "Pro Yoga Mat 6mm Blue",
+      "after": "Pro Yoga Mat 6mm Extra Thick Blue with Carry Strap",
+      "source": "seller_central_action_log"
+    }
+  ],
+  "metrics": [
+    {
+      "asin": "B0OWNHERO01",
+      "buy_box_pct": 74,
+      "sessions": 5200,
+      "unit_session_pct": 11.1,
+      "ordered_units": 577,
+      "notes": "BB% down from ~88% prior week"
+    },
+    {
+      "asin": "B0OWNHERO02",
+      "buy_box_pct": 91,
+      "sessions": 1800,
+      "unit_session_pct": 9.4,
+      "ordered_units": 169
+    }
+  ]
+}
