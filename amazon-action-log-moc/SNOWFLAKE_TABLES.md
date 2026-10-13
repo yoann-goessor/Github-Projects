@@ -1,116 +1,118 @@
-# Snowflake tables found (from warehouse column dump)
+# Snowflake tables for Amazon action-log MOC
 
-Source: screenshot of `INFORMATION_SCHEMA`-style result  
-Catalog: **`ANALYTICS`**  
-Note: no `SMART.PHOENIX` / `PHOENIX` schema appeared in this dump. Closest “product intelligence” schema is **`RIGEL`** (plus `ANALYTICS.AMAZON` Seller Central feeds).
+## What’s in the dump you shared
 
-OCR truncated some names; stems below are recovered from the image. Confirm exact names with:
+Catalog: **`ANALYTICS`** only (screenshot truncated at PNG max height).
+
+**No hits** for: `PHOENIX`, `CATALOG`, `PDP`, `SCRAP%`, `KEEPA`, `COMPET%`, `LISTING`, `CONTENT`, `REVIEW`, `BSR`, `KEYWORD`, `TRAFFIC`, `PRICE_HIST`.
+
+### Closest “scraper” signal present
+
+| Table stem | Schema | Why it matters |
+|------------|--------|----------------|
+| **`SCS_ACCOUNT_*`** | `RIGEL` | Has `CRAWL_ID`, `SNAPSHOT_DATE`, `CHILD_ASIN`/`PARENT_ASIN`, `BUY_BOX_%`, `SESSIONS`, `PAGE_VIEWS`, `UNIT_SESSION_%`, `ORDERED_UNITS` — **own-account SCS crawl**, not competitor PDP |
+
+### Other useful tables present
+
+| Stem | Schema | Use |
+|------|--------|-----|
+| `INVENTORY_*` | `AMAZON`, `STAGING` | Own stock snapshots (`SNAPSHOT` timestamp) |
+| `ORDERS_*` (`C/E/F/L/P/R/S`) | `AMAZON` | Own order/units |
+| `ADS_SPONSORED_*`, `ADVERTISING_*` | `AMAZON`, `STAGING` | Ad pressure |
+| `FEE_PREVIEW_*`, `FBA_RETURNS_*`, `SETTLEMENT_*` | `AMAZON` | Finance/returns |
+| `BRAND_RE*`, `BRAND_IN*`, `BRAND_OI*` | `RIGEL`, `PUBLIC`, `STAGING` | Brand inventory / ops |
+| `ITEM_MASTER`, `ITEM_SALES` | `NETSUITE` | ASIN↔SKU map (`AMZ_ASIN`) |
+| `OPERATIONS_*`, `SUPPLIER_*` | `RIGEL` | Ops snapshots |
+
+These cover **own performance + inventory + ads**. They do **not** cover listing content action history or competitor PDP changes.
+
+---
+
+## Find catalog / PDP scraper tables (run this)
+
+Your dump likely missed other databases or names. Run **unfiltered** across the account:
 
 ```sql
-SHOW TABLES IN SCHEMA ANALYTICS.AMAZON;
+-- 1) Every table that looks like catalog / PDP / scrape / competitor
+SELECT
+  table_catalog,
+  table_schema,
+  table_name,
+  row_count,
+  comment
+FROM snowflake.account_usage.tables
+WHERE deleted IS NULL
+  AND (
+       table_catalog ILIKE ANY ('%PHOENIX%','%SMART%','%RAW%','%SCRAP%','%CRAWL%','%CATALOG%','%DATALAKE%','%ANALYTICS%')
+    OR table_schema  ILIKE ANY ('%PHOENIX%','%SMART%','%SCRAP%','%CRAWL%','%CATALOG%','%PDP%','%COMPET%','%KEEPA%','%ASIN%','%MARKET%')
+    OR table_name    ILIKE ANY (
+         '%CATALOG%','%PDP%','%SCRAP%','%CRAWL%','%COMPET%','%KEEPA%',
+         '%LISTING%','%CONTENT%','%PRODUCT_PAGE%','%ASIN_SNAP%','%PRICE_HIST%',
+         '%BUYBOX%','%BUY_BOX%','%OFFER%','%REVIEW%','%RATING%','%BSR%',
+         '%KEYWORD%','%SEARCH_TERM%','%SERP%','%WATCHLIST%','%PEER%'
+       )
+  )
+ORDER BY table_catalog, table_schema, table_name;
+```
+
+```sql
+-- 2) Columns that scream PDP scraper / listing change log
+SELECT
+  table_catalog,
+  table_schema,
+  table_name,
+  column_name,
+  data_type
+FROM snowflake.account_usage.columns
+WHERE deleted IS NULL
+  AND column_name ILIKE ANY (
+    '%TITLE%','%BULLET%','%IMAGE%','%A_PLUS%','%A+%','%BACKEND_KEYWORD%',
+    '%LIST_PRICE%','%LANDED_PRICE%','%COUPON%','%BUY_BOX%',
+    '%REVIEW_COUNT%','%RATING%','%BSR%','%BEST_SELLER%',
+    '%CRAWL%','%SCRAP%','%SNAPSHOT%','%BEFORE%','%AFTER%',
+    '%COMPETITOR%','%WATCHLIST%','%PEER_ASIN%'
+  )
+ORDER BY 1,2,3,4;
+```
+
+```sql
+-- 3) Confirm exact Rigel SCS table name + columns
 SHOW TABLES IN SCHEMA ANALYTICS.RIGEL;
-SHOW TABLES IN SCHEMA ANALYTICS.STAGING;
+DESCRIBE TABLE ANALYTICS.RIGEL.<scs_account_table>;
 ```
 
-## Schemas present
+Paste the result of query **1** (and **2** if short) and we can map every MOC field to `database.schema.table.column`.
 
-| Schema | Role (inferred) |
-|--------|-----------------|
-| `AMAZON` | Seller Central / Daton Amazon feeds |
-| `STAGING` | Staging copies of Amazon + ads |
-| `RIGEL` | Ops / SCS account metrics / brand replenishment |
-| `NETSUITE` | ERP inventory / item master |
-| `PUBLIC` / `PUBLIC1` | Shared brand / inventory reports |
-| `GOOGLE_*` | Google Ads |
-| `SHOPIFY_*` | Shopify |
-| `REPORTS` / `RAW_LOG` / `DATALAKE` / `COMMON` | Audits, reports, shared |
+---
 
-## Tables / stems in `ANALYTICS.AMAZON`
+## Target mapping (once catalog/PDP tables exist)
 
-| Stem (OCR) | Likely full name | Useful for MOC? |
-|------------|------------------|-----------------|
-| `ADS_SPONSORED_*` | Sponsored Products ads | Ad pressure context |
-| `ADVERTISING_*` | Ads performance | Ad spend / units |
-| `AMAZON_*` | Generic Amazon feed tables | Maybe |
-| `ORDERS_C/E/F/L/P/R/S` | Order report variants | Own sales volume |
-| `INVENTORY_*` | FBA inventory | Own stock actions |
-| `FEE_PREVIEW_*` | Fee preview | Margin, not listing actions |
-| `FBA_RETURNS_*` | Returns | Secondary |
-| `SETTLEMENT_*` | Settlements | Finance |
-| `RECEIVED_*` | Received inventory | Inbound |
-| `UNIFIED_*` | Unified Amazon view | Maybe |
-| `AUDIT_DB*` | Pipeline audit | Not listing audit |
-| `NETSUITE_*` | Amazon↔NetSuite bridge | SKU map |
+| MOC need | Look for table patterns |
+|----------|-------------------------|
+| Own listing action log | `%LISTING%HISTORY%`, `%CATALOG%AUDIT%`, `%CONTENT%CHANGE%`, SP-API listings items changelog |
+| Competitor PDP snapshots | `%PDP%`, `%SCRAP%`, `%CRAWL%ASIN%`, `%PRODUCT_PAGE%` |
+| Competitor price/BB | `%PRICE%`, `%BUY_BOX%`, `%OFFER%`, `%FEATURED_OFFER%` |
+| Reviews / BSR | `%REVIEW%`, `%RATING%`, `%BSR%` |
+| Peer set | `%COMPETITOR%`, `%WATCHLIST%`, `%PEER%` |
+| Own metrics (already found) | `ANALYTICS.RIGEL.SCS_ACCOUNT_*` |
 
-## Tables / stems in `ANALYTICS.RIGEL` (highest value for this use case)
+---
 
-| Stem | Columns seen in dump | Use |
-|------|----------------------|-----|
-| **`SCS_ACCOUNT_*`** | `ACCOUNT`, `CHILD_ASIN`, `PARENT_ASIN`, `SKU`, `MARKETPLACE`, `COUNTRY`, `SNAPSHOT_DATE`, `BUY_BOX_%`, `SESSIONS`, `PAGE_VIEWS`, `UNIT_SESSION_%`, `ORDERED_UNITS`, `TOTAL_ORDER_ITEMS`, `CRAWL_ID`, `RIGEL_INGESTED_AT` | **Own metrics** (BB%, traffic, CVR) |
-| `BRAND_RE*` | inventory / OOS / weeks of cover style fields | Ops health |
-| `OPERATIONS_*` | partner, snapshot | Ops |
-| `SUPPLIER_*` | supplier, sku, qty, snapshot | Supply |
+## Prompt for another LLM with Snowflake access
 
-## Staging mirrors
+```text
+Search our Snowflake account for catalog + PDP scraper tables needed for:
+1) own Amazon listing action log (title/bullets/images/A+/price/coupon/inventory changes with before/after)
+2) competitor PDP signals (price, coupon, buy box, stock, title/images, reviews, BSR)
 
-`STAGING` also has: `ADVERTISING_*`, `AMAZON_*`, `BRAND_IN*`, `BRAND_OI*`, `FEE_PREVIEW_*`, `INVENTORY_*`, `GA_ADVER*`, `BILL_INFO`, `ADDITIONS_*`.
+Run account_usage.tables / columns filters for:
+CATALOG, PDP, SCRAP, CRAWL, COMPET, KEEPA, LISTING, CONTENT, BUY_BOX, PRICE_HIST, REVIEW, BSR, WATCHLIST.
 
-## Mapping to MOC data points
+Also include ANALYTICS.RIGEL.SCS_ACCOUNT* (own crawl metrics) and ANALYTICS.AMAZON.INVENTORY* / ORDERS*.
 
-| Needed data point | Best table(s) from this dump | Status |
-|-------------------|------------------------------|--------|
-| Own Buy Box % | `RIGEL.SCS_ACCOUNT_*` (`BUY_BOX_*`) | Found |
-| Own sessions / page views / unit session % / ordered units | `RIGEL.SCS_ACCOUNT_*` | Found |
-| Own inventory level changes | `AMAZON.INVENTORY_*` (+ staging) | Found (levels, not full action audit) |
-| Own orders / units | `AMAZON.ORDERS_*` | Found |
-| Own ads | `AMAZON.ADS_SPONSORED_*`, `ADVERTISING_*` | Found |
-| Own listing **content/price action log** (who changed title/images/price) | — | **MISSING in this dump** |
-| Competitor ASIN watchlist | — | **MISSING** |
-| Competitor price / coupon / content / BSR / reviews | — | **MISSING** |
+Return:
+| data_point | catalog.schema.table | columns | grain |
+plus one SQL that builds the LLM paste-pack for a date window + hero ASINs + competitor ASINs.
 
-## Practical SQL starting points
-
-### Own metrics pack (from Rigel SCS)
-
-```sql
-SELECT *
-FROM ANALYTICS.RIGEL.SCS_ACCOUNT -- confirm exact table name
-WHERE snapshot_date BETWEEN :start AND :end
-  AND child_asin IN (:hero_asins)
-ORDER BY snapshot_date, child_asin;
+Do not invent tables — only evidenced names.
 ```
-
-### Own inventory snapshots
-
-```sql
-SELECT *
-FROM ANALYTICS.AMAZON.INVENTORY -- confirm exact table name
-WHERE /* date column */ BETWEEN :start AND :end
-ORDER BY 1;
-```
-
-### Discover exact names
-
-```sql
-SELECT table_schema, table_name
-FROM ANALYTICS.INFORMATION_SCHEMA.TABLES
-WHERE table_schema IN ('AMAZON','RIGEL','STAGING')
-ORDER BY 1,2;
-```
-
-## Gaps to chase next
-
-Ask your data team / search Snowflake for tables matching:
-
-```sql
-SELECT table_schema, table_name
-FROM ANALYTICS.INFORMATION_SCHEMA.TABLES
-WHERE table_name ILIKE ANY (
-  '%LISTING%','%CATALOG%','%CONTENT%','%COMPETITOR%','%KEEPA%',
-  '%BUYBOX%','%BUY_BOX%','%PRICE_HISTORY%','%ASIN_SNAPSHOT%',
-  '%ACTION%','%AUDIT_LOG%','%PHOENIX%'
-)
-ORDER BY 1,2;
-```
-
-Without those, Phoenix/Rigel can power **own performance + inventory + ads**, but not a true **listing action log vs competitor moves** brief.
